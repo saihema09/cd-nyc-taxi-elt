@@ -39,12 +39,15 @@ flowchart LR
 | Models | `dbt_project/taxi_dbt` | Builds `fct_trips` and `dim_date` with tests |
 | Reconcile | `quality/reconcile.py` | Checks row counts across layers and fails on mismatches |
 
-## Results (January 2024)
+## Results (January to March 2024)
 
-- Bronze: 2,964,624 rows
-- Silver: 2,754,887 rows (209,737 invalid or duplicate rows removed)
-- Fact table: 2,754,887 rows, all trip IDs unique
-- Reconciliation: passes at every layer, with zero invalid rows
+| Month | Rows | Distinct trip IDs | Reconciliation |
+|---|---|---|---|
+| 2024-01 | 2,754,887 | 2,754,887 | PASS |
+| 2024-02 | 2,752,969 | 2,752,969 | PASS |
+| 2024-03 | 3,075,349 | 3,075,349 | PASS |
+
+Total: 8,583,205 trips loaded, with no duplicate trip IDs and no invalid rows.
 
 ## Data quality checks
 
@@ -64,7 +67,7 @@ flowchart LR
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
-3. Download January 2024 data into `data/raw/`:
+3. Download the monthly data into `data/raw/` (January, February, and March 2024 were used):
    - `yellow_tripdata_2024-01.parquet` from the NYC TLC trip record page
    - `taxi_zone_lookup.csv`
 4. Run the layers in order:
@@ -86,6 +89,5 @@ flowchart LR
 
 ## Next steps
 
-- Add February and March 2024 to demonstrate incremental loading.
 - Add a Gold layer with aggregated trip metrics.
 - Replace hardcoded credentials with environment variables.

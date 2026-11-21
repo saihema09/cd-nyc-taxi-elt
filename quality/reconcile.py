@@ -16,11 +16,11 @@ cur = conn.cursor()
 cur.execute("SELECT count(*) FROM staging.trips_silver WHERE pickup_month = %s", (month,))
 staged_rows = cur.fetchone()[0]
 
-cur.execute("SELECT count(*), count(DISTINCT trip_id) FROM analytics.fct_trips")
+cur.execute("SELECT count(*), count(DISTINCT trip_id) FROM analytics.fct_trips WHERE pickup_month = %s", (month,))
 fact_rows, distinct_ids = cur.fetchone()
 
 cur.execute("""SELECT count(*) FROM analytics.fct_trips
-               WHERE fare_amount < 0 OR trip_distance <= 0 OR dropoff_at < pickup_at""")
+               WHERE pickup_month = %s AND (fare_amount < 0 OR trip_distance <= 0 OR dropoff_at < pickup_at)""", (month,))
 invalid_rows = cur.fetchone()[0]
 conn.close()
 

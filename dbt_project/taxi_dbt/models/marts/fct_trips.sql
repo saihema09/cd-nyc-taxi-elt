@@ -9,5 +9,6 @@ select
     passenger_count,
     trip_distance,
     fare_amount,
-    total_amount
+    total_amount,
+    pickup_month
 from {{ ref('stg_trips') }}
