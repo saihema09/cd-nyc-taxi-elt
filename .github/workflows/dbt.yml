@@ -1,0 +1,41 @@
+name: dbt-tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: taxi
+          POSTGRES_PASSWORD: taxi
+          POSTGRES_DB: taxi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-retries 10
+    env:
+      PG_HOST: localhost
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt
+        run: pip install dbt-core==1.8.2 dbt-postgres==1.8.2
+
+      - name: Load sample data into staging
+        working-directory: dbt_project/taxi_dbt
+        run: |
+          dbt seed --profiles-dir .
+          PGPASSWORD=taxi psql -h localhost -U taxi -d taxi -c "CREATE SCHEMA IF NOT EXISTS staging; DROP TABLE IF EXISTS staging.trips_silver; CREATE TABLE staging.trips_silver AS SELECT * FROM analytics.sample_trips;"
+
+      - name: Build and test models
+        working-directory: dbt_project/taxi_dbt
+        run: dbt build --profiles-dir .
